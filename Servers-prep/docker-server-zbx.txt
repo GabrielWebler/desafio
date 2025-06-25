@@ -1,0 +1,39 @@
+
+echo "192.168.1.44 k8s-control-node" | sudo tee -a /etc/hosts
+echo "192.168.1.112 node" | sudo tee -a /etc/hosts
+echo "192.168.1.112 comments.devops-challenge.globo.local #server-02" | sudo tee -a /etc/hosts
+echo "192.168.1.115 comments.devops-challenge.globo.local #node-vm-4" | sudo tee -a /etc/hosts
+echo "192.168.1.117 comments.devops-challenge.globo.local #node-vm-2" | sudo tee -a /etc/hosts
+echo "192.168.1.107 comments.devops-challenge.globo.local #node-vm-3" | sudo tee -a /etc/hosts
+
+
+sudo apt-get update
+sudo apt-get install -y htop chrony
+sudo service chronyd restart
+sudo systemctl enable chrony
+sudo timedatectl set-timezone America/Sao_Paulo
+sudo ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+sudo apt-get upgrade -y
+sudo reboot -n
+
+
+sudo apt install -y docker.io
+sudo apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin
+systemctl start docker
+systemctl enable docker
+systemctl status docker
+newgrp docker
+sudo usermod -aG docker ${USER}
+
+sudo mkdir /opt/cont_zabbix_web
+sudo mkdir /opt/cont_zabbix_app
+sudo mkdir /opt/cont_zabbix_app/configs
+sudo mkdir /opt/cont_zabbix_app/logs
+sudo mkdir /opt/cont_zabbix_db
+sudo mkdir /opt/docker_files/
+sudo chown -R user:user /opt/cont_*
+sudo chown -R user:user /opt/docker_files
+
+#arquivo docker-compose-zabbix.yml deve ser criado no diretorio /opt/docker_files/docker_files
+
+docker compose -f docker-compose-zabbix.yml up -d

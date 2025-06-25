@@ -1,0 +1,70 @@
+services:
+  zabbix-db:
+    image: postgres:14
+    container_name: zabbix-db
+    hostname: zabbix-db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - /opt/cont_zabbix_db:/var/lib/mysql
+    environment:
+      POSTGRES_DB: zabbix
+      POSTGRES_PASSWORD: zabbix_usr
+      POSTGRES_USER: zabbix_usr
+    networks:
+      - zabbix-net
+
+  zabbix-server:
+    #image: zabbix/zabbix-server-mysql:ubuntu-latest
+    image: zabbix/zabbix-server-pgsql:ubuntu-latest
+    container_name: zabbix-server
+    hostname: zabbix-server
+    restart: always
+    privileged: true
+    ports:
+      - "10051:10051"
+      - "10050:10050"
+      - "162:1162/udp"
+      - "161:1161/udp"
+    environment:
+      TZ: "America/Sao_Paulo"
+      DB_SERVER_HOST: zabbix-db
+      POSTGRES_DB: zabbix
+      POSTGRES_USER: zabbix_usr
+      POSTGRES_PASSWORD: zabbix_usr
+      ZBX_SERVER_NAME: "Zabbix Server"
+    depends_on:
+      - zabbix-db
+    networks:
+      - zabbix-net
+    volumes:
+      - /opt/cont_zabbix_app/configs:/etc/zabbix
+      - /opt/cont_zabbix_app/logs:/var/log/zabbix
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:ubuntu-latest
+    container_name: zabbix-web
+    hostname: zabbix-web
+    restart: always
+    ports:
+      - "8080:8080"
+      - "80:80"
+      - "443:443"
+    environment:
+      PHP_TZ: "America/Sao_Paulo"
+      DB_SERVER_HOST: zabbix-db
+      POSTGRES_DB: zabbix
+      POSTGRES_USER: zabbix_usr
+      POSTGRES_PASSWORD: zabbix_usr
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_WEB_NAME: "Zabbix Geral"
+    volumes:
+      - /opt/cont_zabbix_web:/mnt/zabbix_web
+    depends_on:
+      - zabbix-server
+    networks:
+      - zabbix-net
+
+networks:
+  zabbix-net:
+    external: true
