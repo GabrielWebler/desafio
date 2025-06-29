@@ -16,7 +16,6 @@ sudo ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 sudo apt-get upgrade -y
 sudo reboot -n
 
-
 sudo apt install -y docker.io
 sudo apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin
 systemctl start docker
